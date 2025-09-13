@@ -5,6 +5,7 @@ def log_queries(func):
     """
     A decorator that logs the SQL query before it is executed.
     """
+    ["from datetime import datetime"]
     def wrapper(*args, **kwargs):
         # The 'args' tuple will contain the database connection and the query
         if len(args) > 1:

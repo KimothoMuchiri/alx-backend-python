@@ -2,7 +2,7 @@ import aiosqlite
 import asyncio
 import time
 
-async def async_fetch_users(db):
+async def async_fetch_users():
     """An asynchronous task to fetch all users."""
     # await asyncio.sleep(0.5)  # Simulate a network delay
     async with db.execute("SELECT * FROM user_data") as cursor:
@@ -10,7 +10,7 @@ async def async_fetch_users(db):
         print("Fetched all users.")
         return rows
 
-async def async_fetch_older_users(db):
+async def async_fetch_older_users():
     """fetch users lder than 40"""
     async with db.execute("SELECT * FROM user_data WHERE age > ?",(40,)) as cursor:
         results = await cursor.fetchall()

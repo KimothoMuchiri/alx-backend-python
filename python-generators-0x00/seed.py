@@ -6,7 +6,9 @@ from mysql.connector import Error
 
 DB_NAME = "ALX_prodev"
 TABLE_NAME = "user_data"
-CSV_FILE = "data.csv"
+CSV_FILE = "python-generators-0x00\data.csv"
+USER = "root"
+PASSWORD = "20marcelati20"
 
 def connect_db():
     """Connects to the MySQL database server."""
@@ -90,7 +92,7 @@ def stream_rows():
     try:
         connection = connect_to_prodev()
         query = f"SELECT * FROM {TABLE_NAME}"
-        with connection.cursor(dictionary=True) as cursor:
+        with connection.cursor(dictionary=True, buffered=True) as cursor:
             cursor.execute(query)
             for row in cursor:
                 yield row
@@ -98,6 +100,13 @@ def stream_rows():
         if connection and connection.is_connected():
             connection.close()
             print("Database connection closed.")
+
+def table_is_empty(connection) -> bool:
+    query = f"SELECT COUNT(*) FROM {TABLE_NAME}"
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        (count,) = cursor.fetchone()
+    return count == 0
 
 def main():
     # Step 1-3: Connect to server, create database, and close connection
@@ -110,8 +119,13 @@ def main():
     db_conn = connect_to_prodev()
     if db_conn:
         create_table(db_conn)
-        if db_conn.cursor().rowcount == 0:  # Check if the table is empty
+
+        if table_is_empty(db_conn):  # Check if the table is empty
+            print(f"{TABLE_NAME} is empty. Loading CSV…")
             insert_data(db_conn, CSV_FILE)
+            print(f"Data has been added to : {TABLE_NAME} ")
+        else:
+            print(f"{TABLE_NAME} already has data. Skipping CSV load.")
         db_conn.close()
 
     # Step 7-8: Use the generator to stream the data

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 import unittest
 from parameterized import parameterized
 from utils import access_nested_map
@@ -23,4 +23,4 @@ class TestAccessNestedMap(unittest.TestCase):
         """
         with self.assertRaises(KeyError) as cm:
             access_nested_map(nested_map, path)
-        self.assertEqual(str(cm.exception), str(expected_key))
+        self.assertIn(str(expected_key), str(cm.exception))

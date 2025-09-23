@@ -12,7 +12,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ['message_id', 'sende_id', 'message_body', 'sent_at']
+        fields = ['message_id', 'sender_id', 'message_body', 'sent_at']
 
 class ConversationSerializer(serializers.ModelSerializer):
     messages = MessagerSerializer(many = True, read_only = True)

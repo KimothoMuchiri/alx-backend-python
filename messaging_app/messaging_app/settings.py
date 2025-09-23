@@ -37,7 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
+    'chats',
+    'rest_framework', # Django REST Framework
+    'corsheaders', # CORS headers
+    'drf_yasg', # Swagger documentation
 ]
 
 MIDDLEWARE = [

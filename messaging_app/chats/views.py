@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django_filters import rest_framework as filters
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from .models import Conversation, Message
@@ -7,6 +8,8 @@ from .serializers import ConversationSerializer, MessageSerializer
 class ConversationViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('participants',)
 
     def get_queryset(self):
         user = self.request.user

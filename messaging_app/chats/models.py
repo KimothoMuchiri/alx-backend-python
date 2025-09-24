@@ -19,13 +19,13 @@ class User(AbstractUser):
 
 class Conversation(models.Model):
     conversation_id = models.UUIDField(default=uuid4, primary_key=True, editable=False)
-    participants_id = models.ManyToManyField('chats.User')
+    participants = models.ManyToManyField('chats.User')
     created_at = models.DateTimeField(auto_now_add= True)
     
 
 class Message(models.Model):
     message_id = models.UUIDField(default = uuid.uuid4, primary_key= True, editable= False)
-    sender_id = models.ForeignKey('chats.User', on_delete=models.CASCADE)
+    sender = models.ForeignKey('chats.User', on_delete=models.CASCADE)
     conversation = models.ForeignKey('chats.Conversation', on_delete = models.CASCADE)
     message_body = models.TextField()
     sent_at = models.DateTimeField(auto_now_add = True)

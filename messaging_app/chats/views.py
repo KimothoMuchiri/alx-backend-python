@@ -4,8 +4,11 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsParticipantOrReadOnly # <-- Import the OLP class
 
 class ConversationViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
+    permission_classes = [IsAuthenticated, IsParticipantOrReadOnly]
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     filter_backends = (filters.DjangoFilterBackend,)

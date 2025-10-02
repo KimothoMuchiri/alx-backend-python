@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework', # Django REST Framework
     'corsheaders', # CORS headers
     'drf_yasg', # Swagger documentation
+    'rest_framework_simplejwt', # JWT authentication
 ]
 
 REST_FRAMEWORK = {
@@ -48,8 +49,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.SessionAuthentication',
+    # ],
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
 

@@ -6,6 +6,8 @@ from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsParticipantOrReadOnly, IsParticipantOfConversation # <-- Import the OLP class
+from django_filters.rest_framework import DjangoFilterBackend # <-- Need this import!
+from .filters import MessageFilter 
 
 class ConversationViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     permission_classes = [IsAuthenticated, IsParticipantOrReadOnly]
@@ -38,7 +40,10 @@ class MessageViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Crea
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
-     def get_queryset(self):
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MessageFilter
+
+    def get_queryset(self):
         user = self.request.user
         
         # 1. Start with all messages

@@ -38,6 +38,19 @@ class MessageViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Crea
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
+     def get_queryset(self):
+        user = self.request.user
+        
+        # 1. Start with all messages
+        queryset = Message.objects.all()
+        
+        # 2. Filter to include only messages linked to conversations 
+        #    where the current user is a participant.
+        #    (Assuming Message has a ForeignKey to Conversation)
+        return queryset.filter(
+            conversation__participants=user
+        ).distinct()
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

@@ -8,7 +8,7 @@ class IsParticipantOrReadOnly(permissions.BasePermission):
 
         # Check for ownership/participation (the write access)
         # This checks if the currently logged-in user is one of the participants
-        return request.user in obj.participants.all()
+        return request.user in obj.participants.all()  # This line covers all other methods (POST, PUT, PATCH, DELETE)
 
 class IsParticipantOfConversation(permissions.BasePermission):
     def has_permission(self, request, view):

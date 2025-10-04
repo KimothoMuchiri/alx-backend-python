@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsParticipantOrReadOnly # <-- Import the OLP class
+from .permissions import IsParticipantOrReadOnly, IsParticipantOfConversation # <-- Import the OLP class
 
 class ConversationViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     permission_classes = [IsAuthenticated, IsParticipantOrReadOnly]
@@ -34,6 +34,7 @@ class ConversationViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins
 
 # Create your views here.
 class MessageViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
+    permission_classes = [IsParticipantOfConversation]
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 

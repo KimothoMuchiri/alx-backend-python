@@ -9,3 +9,8 @@ class IsParticipantOrReadOnly(permissions.BasePermission):
         # Check for ownership/participation (the write access)
         # This checks if the currently logged-in user is one of the participants
         return request.user in obj.participants.all()
+
+class IsParticipantOfConversation(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # Allow access ONLY if the user is logged in (authenticated)
+        return request.user.is_authenticated

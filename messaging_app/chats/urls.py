@@ -3,6 +3,9 @@ from rest_framework_nested import routers
 from .views import ConversationViewSet, MessageViewSet
 
 router = routers.DefaultRouter()
+
+# Register your viewsets
+router.register(r'messages', MessageViewSet, basename = 'message')
 router.register(r'conversations', ConversationViewSet, basename='conversation')
 
 conversations_router = routers.NestedDefaultRouter(router, r'conversations', lookup='conversation')

@@ -53,7 +53,7 @@ class MessageViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Crea
         #    where the current user is a participant.
         #    (Assuming Message has a ForeignKey to Conversation)
         return queryset.filter(
-            conversation__participants=user
+            conversation__participants=user.pk
         ).distinct()
 
     def create(self, request, *args, **kwargs):
@@ -71,3 +71,9 @@ class MessageViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Crea
         
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        # The serializer save method accepts additional keyword arguments, 
+        # which are passed to the Model.objects.create() method.
+        # We pass the authenticated user from the request to the 'sender' field.
+        serializer.save(sender=self.request.user) 

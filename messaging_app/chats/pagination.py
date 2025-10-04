@@ -1,4 +1,5 @@
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
 class MessagePagination(PageNumberPagination):
     # This sets the number of items per page for this specific class

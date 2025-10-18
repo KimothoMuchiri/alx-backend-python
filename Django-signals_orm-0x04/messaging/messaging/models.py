@@ -11,9 +11,26 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    #field to track if the message has ever been edited
+    edited = models.BooleanField(default=False)
 
     def __str__(self):
         return f"From {self.sender.username} to {self.receiver.username}"
+
+class MessageHistory(models.Model):
+    """Stores the old versions of a Message every time it is edited."""
+    
+    # Link to the current Message object
+    message = models.ForeignKey(Message, related_name='history', on_delete=models.CASCADE)
+    
+    # The content *before* the current save operation
+    old_content = models.TextField() 
+    
+    # When this historical record was created (when the edit happened)
+    edited_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"History for Message ID {self.message.id} recorded at {self.edited_at.strftime('%Y-%m-%d %H:%M')}"
 
 class Notification(models.Model):
     """Stores a record of a notification for a user."""

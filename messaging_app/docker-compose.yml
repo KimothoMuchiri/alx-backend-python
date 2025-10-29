@@ -1,0 +1,54 @@
+services:
+  web:
+    # Tells Compose to build the image using the Dockerfile in the current directory
+    build: . 
+    # Maps the host port 8000 to the container port 8000
+    ports:
+      - "8000:8000"
+    # Ensures the 'db' container starts and is ready before 'web' attempts to start
+    depends_on:
+      - db
+    # Tells the 'web' service to load variables from the .env file
+    env_file:
+      - .env
+    # Connects to the database service using the hostname 'db'
+    environment:
+      # This explicitly passes the necessary DB variables to the Django container
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Waiting for db...";
+        until mysqladmin --protocol=tcp --skip-ssl \
+          -h "$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" ping --silent; do
+          sleep 2
+        done
+        echo "DB is up. Running Django setup…"
+        python manage.py migrate --noinput &&
+        python manage.py collectstatic --noinput &&
+        python manage.py runserver 0.0.0.0:8000
+
+  db:
+    # Uses a pre-built MySQL image from Docker Hub
+    image: mysql:8.0
+    # Restarts the container if it stops unexpectedly
+    restart: always
+    # Loads the database credentials from the .env file
+    env_file:
+      - .env
+    # 6. Optional: Data persistence for the database
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+# Defines the volume for persistent storage
+volumes:
+  mysql_data:

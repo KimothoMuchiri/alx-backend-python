@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-router-service
+spec:
+  type: ClusterIP # Keeps it internal, as Ingress is handling external exposure
+  # 💡 The selector initially targets the stable, current (Blue) version
+  selector:
+    app: django-messenger
+    version: blue # <--- ONLY TRAFFIC TO BLUE PODS
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000

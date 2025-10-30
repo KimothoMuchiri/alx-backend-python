@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-green-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: django-messenger
+      version: green # <--- NEW KEY LABEL!
+  template:
+    metadata:
+      labels:
+        app: django-messenger
+        version: green # <--- Pods get this label
+    spec:
+      containers:
+      - name: django-green-container
+        image: messaging-app:v1.0 # <--- New Image (or :latest if no change - used old image just for demonstartion)
+        ports:
+        - containerPort: 8000

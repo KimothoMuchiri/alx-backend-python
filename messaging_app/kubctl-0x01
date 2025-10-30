@@ -1,0 +1,48 @@
+#!/bin/bash
+# kubctl-0x01: Scale, Verify, Load Test, and Monitor Django App
+
+# --- 1. Scale Down (Optional, but shows the command usage) ---
+echo "--- Scaling Deployment to 1 Replica to demonstrate 'kubectl scale' ---"
+# Syntax: kubectl scale --replicas=<NUMBER> <KIND>/<NAME>
+kubectl scale --replicas=1 deployment/django-app-deployment
+sleep 5
+
+# --- 2. Scale Up to Required Replicas (3) ---
+echo "--- Scaling Deployment to 3 Replicas ---"
+kubectl scale --replicas=3 deployment/django-app-deployment
+sleep 10 # Give Kubernetes time to create the two new Pods
+
+# --- 3. Verify Multiple Pods are Running ---
+echo "--- Verifying Pod Status ---"
+kubectl get pods -l app=django-messenger
+
+# --- 4. Get Access URL for Load Testing ---
+# This command extracts the accessible IP and Port for the service
+echo "--- Retrieving Service URL for Load Testing ---"
+echo "IMPORTANT: Copy the URL that appears. If a browser opens and the script stalls, press Ctrl+C to close the tunnel and continue the script."
+#SERVICE_URL=$(minikube service django-app-service --url 2>/dev/null)
+MINIKUBE_IP=$(minikube ip)
+echo "Minikube IP: $MINIKUBE_IP"
+SERVICE_PORT=$(kubectl get service django-app-service -o=jsonpath='{.spec.ports[0].port}')
+echo "Service Port: $SERVICE_PORT"
+SERVICE_URL="http://$MINIKUBE_IP:$SERVICE_PORT"
+echo "Service URL for Load Testing: $SERVICE_URL"
+
+if [ -z "$SERVICE_URL" ]; then
+    echo "ERROR: Could not get Service URL. Ensure minikube service is configured."
+    exit 1
+fi
+
+echo "--- Service URL for Load Testing: $SERVICE_URL ---"
+
+# --- 5. Perform Load Testing using wrk (10 threads, 60 connections, 30 seconds) ---
+# NOTE: You must have 'wrk' installed on your system for this step to work.
+echo "--- Starting Load Test with wrk ---"
+wrk -t10 -c60 -d30s $SERVICE_URL
+
+# --- 6. Monitor Resource Usage ---
+# NOTE: Requires the 'metrics-server' to be running in Minikube.
+echo "--- Monitoring Resource Usage with kubectl top ---"
+kubectl top pod -l app=django-messenger --containers
+
+echo "Script finished."

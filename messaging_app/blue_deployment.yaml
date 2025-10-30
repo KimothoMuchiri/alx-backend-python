@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-blue-deployment
+spec:
+  replicas: 3 # 3 identical pods running at all times
+  selector:
+    matchLabels:
+       app: django-messenger # this links the deployment to the pods its manages
+       version: blue  #<- new key label
+  template:
+    metadata:
+      labels:
+       app: django-messenger # this label is applied to all pods
+       version: blue #<- pods get this label
+    spec:
+      containers:
+      - name: django-blue-container
+        image: messaging-app:v1.0 # Define the docker image to use
+        ports:
+        - containerPort: 8000 # the port the container exposed internally 

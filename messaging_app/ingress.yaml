@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: django-ingress
+  annotations:
+    # This annotation tells the ingress controller which service to use for the default backend.
+    # It ensures that Nginx is the controller handling this Ingress resource.
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - http:
+      paths:
+      # Rule 1: The main app route
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: django-app-service  # <-- The name of your existing Service
+            port:
+              number: 80             # <-- The port the Service exposes (port: 80 from service.yaml)
+      # Rule 2: A specialized API route
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: django-app-service # <-- Can route to the same or a different service
+            port:
+              number: 80

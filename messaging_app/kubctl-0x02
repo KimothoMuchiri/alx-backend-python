@@ -1,0 +1,36 @@
+#!/bin/bash
+# kubctl-0x02: Deploy Blue, Green, and Router Service, then Verify Green
+
+BLUE_DEPLOYMENT="django-blue-deployment"
+GREEN_DEPLOYMENT="django-green-deployment"
+
+echo "--- 1. Apply Blue (Current) and Router Service ---"
+# Deploys the stable version and the router service pointing to it
+kubectl apply -f blue_deployment.yaml
+kubectl apply -f kubeservice.yaml
+sleep 5
+
+echo "--- 2. Apply Green (New Version) Deployment ---"
+# Deploy the new version alongside the current one
+kubectl apply -f green_deployment.yaml
+sleep 15 # Give time for the new green Pods to pull the image and start
+
+echo "--- 3. Verify Green Deployment Pods ---"
+# Check that 3 green pods are running (should be 3/3 READY)
+kubectl get pods -l version=green
+
+echo "--- 4. Check Logs for a Sample Green Pod (Error Check) ---"
+# Get the name of one of the new green pods
+GREEN_POD_NAME=$(kubectl get pods -l version=green -o jsonpath="{.items[0].metadata.name}")
+
+if [ -z "$GREEN_POD_NAME" ]; then
+    echo "ERROR: Could not find a running Green Pod. Check ImagePullBackOff or CrashLoopBackOff status."
+else
+    echo "Logs for new Green Pod: $GREEN_POD_NAME"
+    # Check the latest logs from the new version
+    kubectl logs $GREEN_POD_NAME
+fi
+
+echo "--- Deployment and Verification Complete. Manual Switch Required ---"
+echo "To switch traffic to the Green version (zero downtime), run the following command:"
+echo "kubectl patch service django-router-service -p '{\"spec\":{\"selector\": {\"version\": \"green\"}}}'"

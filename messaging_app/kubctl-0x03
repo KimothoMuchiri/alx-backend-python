@@ -1,0 +1,45 @@
+#!/bin/bash
+# kubctl-0x03: Trigger and Monitor Rolling Update with Zero-Downtime Test
+
+DEPLOYMENT_NAME="django-blue-deployment"
+DEPLOYMENT_FILE="./blue_deployment.yaml"
+# 🚨 IMPORTANT: Replace with your actual working URL from the Ingress task!
+INGRESS_URL="127.0.0.1:54686"
+#http://127.0.0.1:54686
+
+echo "--- 1. Triggering Rolling Update on $DEPLOYMENT_NAME ---"
+# Applies the modified YAML file, starting the rolling update process
+kubectl apply -f $DEPLOYMENT_FILE
+
+# Start the continuous curl test in the background (&)
+echo "--- 2. Starting Zero-Downtime Test (Continuous Requests) ---"
+echo "--- Press Ctrl+C in THIS terminal to stop the curl test only ---"
+echo "Accessing $INGRESS_URL every 0.2 seconds..."
+
+# Loop continuously to hit the URL and check the HTTP status code
+while true; do
+  STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" $INGRESS_URL)
+  if [ "$STATUS_CODE" -eq 200 ]; then
+    echo -n "✅"  # Success (200 OK)
+  else
+    echo -n "❌ (Code: $STATUS_CODE)"  # Failure (any other code, including 000 if inaccessible)
+  fi
+  sleep 0.2
+done &
+CURL_PID=$! # Capture the PID of the background curl process
+
+echo ""
+echo "--- 3. Monitoring Update Progress (in the foreground) ---"
+# This command watches the rollout status and blocks until complete or failure
+kubectl rollout status deployment/$DEPLOYMENT_NAME
+
+# Once the rollout status command finishes, stop the background curl test
+echo ""
+echo "--- 4. Rolling Update Complete. Stopping continuous test. ---"
+kill $CURL_PID 2>/dev/null
+
+echo "--- 5. Verifying Final Pod Status ---"
+# Shows the new pods and their age
+kubectl get pods -l version=blue
+
+echo "Script kubctl-0x03 finished."

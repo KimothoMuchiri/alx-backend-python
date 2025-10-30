@@ -1,0 +1,37 @@
+#!/bin/bash
+# ----------------------------------------------------
+# Script: kurbeScript
+# Objective: Start Minikube, check cluster status, and list Pods.
+# ----------------------------------------------------
+
+echo "Starting Minikube Kubernetes cluster..."
+# 1. Starts a Kubernetes cluster 
+# We use the 'minikube start' command. It handles setting up the single-node VM/container.
+# Using --driver=docker is a common way to quickly start Minikube if Docker is installed.
+minikube start --driver=docker
+
+# Check the exit status of the previous command
+if [ $? -ne 0 ]; then
+    echo " ERROR: Minikube failed to start. Please ensure Minikube and Docker/a hypervisor are installed and running."
+    exit 1
+fi
+
+echo ""
+echo "Minikube cluster has started!"
+echo "------------------------------------------------------------------"
+
+echo "Verifying cluster status using kubectl cluster-info..."
+# 2. Verifies that the cluster is running using kubectl cluster-info.
+kubectl cluster-info
+
+echo "------------------------------------------------------------------"
+
+echo "Retrieving all available pods across all namespaces..."
+# 3. Retrieves the available pods.
+# -A (or --all-namespaces) is the best practice to see all Kubernetes-system Pods
+# as well as any user-deployed Pods.
+kubectl get pods -A
+
+echo "------------------------------------------------------------------"
+echo "Cluster setup and verification complete!"
+echo "You can now interact with your cluster using 'kubectl'."

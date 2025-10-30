@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-app-service
+spec:
+  type: ClusterIP # Exposes the Service on an internal cluster IP
+  selector:
+    app: django-messenger # IMPORTANT: This must match the label defined in deployment.yaml!
+  ports:
+    - protocol: TCP
+      port: 80 # The port other services/users inside the cluster will use to talk to the Service
+      targetPort: 8000 # The port the Pods (containers) are listening on internally

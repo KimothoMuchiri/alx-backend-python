@@ -2,6 +2,8 @@ services:
   web:
     # Tells Compose to build the image using the Dockerfile in the current directory
     build: . 
+    # builds a specific version
+    image: messaging-app:v1.3
     # Maps the host port 8000 to the container port 8000
     ports:
       - "8000:8000"

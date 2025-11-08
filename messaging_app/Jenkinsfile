@@ -1,0 +1,62 @@
+pipeline {
+    // 1. Define the agent to run the entire pipeline
+    agent any
+
+    // 2. Define environment variables (optional but good practice)
+    environment {
+        // The ID of the credential we created for GitHub
+        GITHUB_CREDENTIAL_ID = 'alx-pat-messenger-app' 
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                // The 'checkout scm' step uses the repository URL defined in the Jenkins job configuration.
+                // It securely uses the GitHub credentials you created.
+                checkout([$class: 'GitSCM', 
+                        branches: [[name: '*/main']], 
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/KimothoMuchiri/alx-backend-python.git', // <<< REPLACE THIS
+                            credentialsId: env.GITHUB_CREDENTIAL_ID
+                        ]]])
+            }
+        }
+
+        stage('Run Tests and Linting') {
+            // Run this stage inside a consistent Python environment
+            agent {
+                docker { image 'python:3.9-slim' } 
+            }
+            steps {
+                sh 'cd messaging_app' // Navigate into the correct directory
+                sh 'echo "Installing dependencies..."'
+                // Assuming your project has a requirements.txt file
+                sh 'pip install -r requirements.txt' 
+                
+                sh 'echo "Installing testing tools..."'
+                sh 'pip install pytest junit-xml' // junit-xml helps generate reports
+                
+                sh 'echo "Running tests..."'
+                // Run pytest, saving the results to a JUnit XML file
+                sh 'pytest --junitxml=test-results.xml' 
+            }
+        }
+
+        stage('Publish Report') {
+            // This stage runs on the main agent to use the JUnit plugin installed on Jenkins
+            agent any 
+            steps {
+                sh 'echo "Publishing test results..."'
+                // The JUnit step reads the XML file and creates a visible report in Jenkins
+                junit 'test-results.xml'
+            }
+        }
+    }
+    
+    // 3. Define post-build actions (optional, runs regardless of success/failure)
+    post {
+        always {
+            echo 'Pipeline finished. Check test results for details.'
+        }
+    }
+}

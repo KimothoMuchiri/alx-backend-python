@@ -28,20 +28,19 @@ pipeline {
                 //docker { image 'python:3.9-slim' } 
             //}
             steps {
-                sh 'cd messaging_app' // Navigate into the correct directory
-                sh 'echo "Installing dependencies..."'
-                // installs python in the agent machine
-                sh 'python -m venv venv'
-                sh '. venv/bin/activate'
-                // Assuming your project has a requirements.txt file
-                sh 'pip install -r requirements.txt' 
-                
-                sh 'echo "Installing testing tools..."'
-                sh 'pip install pytest junit-xml' // junit-xml helps generate reports
-                
-                sh 'echo "Running tests..."'
-                // Run pytest, saving the results to a JUnit XML file
-                sh 'pytest --junitxml=test-results.xml' 
+                dir('messaging_app'){
+                    sh '''
+                      echo "Installing dependencies..."
+                      python3 -m venv .venv
+                      . .venv/bin/activate
+                      python -m pip install --upgrade pip
+                      'pip install -r requirements.txt' 
+                       echo "Installing testing tools..."
+                       pip install pytest
+                       echo "Running tests..."
+                       pytest --junitxml=test-results.xml
+                    '''
+                } 
             }
         }
 

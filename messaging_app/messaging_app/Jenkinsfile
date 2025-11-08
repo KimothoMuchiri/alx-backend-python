@@ -5,7 +5,8 @@ pipeline {
     // 2. Define environment variables (optional but good practice)
     environment {
         // The ID of the credential we created for GitHub
-        GITHUB_CREDENTIAL_ID = 'alx-pat-messenger-app' 
+        GITHUB_CREDENTIAL_ID = 'alx-pat-messenger-app'
+        
     }
 
     stages {
@@ -53,6 +54,47 @@ pipeline {
                 junit 'test-results.xml'
             }
         }
+
+        stage('Build Docker Image') {
+            agent {
+                // Use a standard Docker agent since we are running Docker commands
+                docker { image 'python:3.9-slim' } 
+            }
+            steps {
+                sh 'cd messaging_app'
+                // Build the image, tagging it with your Docker Hub username and a build number
+                script {
+                    def imageTag = "elcoder062/messaging-app:${env.BUILD_NUMBER}" // <<< REPLACE USERNAME
+                    
+                    // Assuming your Dockerfile is in the 'messaging_app' directory:
+                    sh "docker build -t ${imageTag} ." 
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            agent {
+                docker { image 'python:3.9-slim' }
+            }
+            steps {
+                sh 'cd messaging_app'
+                // Use the withCredentials block to securely expose Docker Hub credentials
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker_cli', // <<< MUST MATCH YOUR ID
+                    passwordVariable: 'DOCKER_PASSWORD', 
+                    usernameVariable: 'DOCKER_USERNAME')]) {
+                    
+                    // Log in to Docker Hub using the masked environment variables
+                    sh "docker login -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD}"
+                    
+                    def imageTag = "elcoder062/messaging-app:${env.BUILD_NUMBER}" // <<< REPLACE USERNAME
+                    
+                    // Push the tagged image
+                    sh "docker push ${imageTag}"
+                }
+            }
+        }
+    
     }
     
     // 3. Define post-build actions (optional, runs regardless of success/failure)

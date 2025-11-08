@@ -24,9 +24,9 @@ pipeline {
 
         stage('Run Tests and Linting') {
             // Run this stage inside a consistent Python environment
-            agent {
-                docker { image 'python:3.9-slim' } 
-            }
+            agent any //{
+                //docker { image 'python:3.9-slim' } 
+            //}
             steps {
                 sh 'cd messaging_app' // Navigate into the correct directory
                 sh 'echo "Installing dependencies..."'

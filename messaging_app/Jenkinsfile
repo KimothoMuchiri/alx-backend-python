@@ -28,7 +28,6 @@ pipeline {
                 //docker { image 'python:3.9-slim' } 
             //}
             steps {
-                tool name: 'Python_3.9',type: 'hudson.plugins.python.PythonInstallation'
                 sh 'cd messaging_app' // Navigate into the correct directory
                 sh 'echo "Installing dependencies..."'
                 // installs python in the agent machine

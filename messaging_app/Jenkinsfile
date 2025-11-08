@@ -32,13 +32,13 @@ pipeline {
                     sh '''
                       echo "Installing dependencies..."
                       python3 -m venv .venv
-                      . .venv/bin/activate
+                      source .venv/bin/activate
                       python -m pip install --upgrade pip
-                      'pip install -r requirements.txt' 
-                       echo "Installing testing tools..."
-                       pip install pytest
-                       echo "Running tests..."
-                       pytest --junitxml=test-results.xml
+                      pip install -r requirements.txt
+                      echo "Installing testing tools..."
+                      pip install pytest
+                      echo "Running tests..."
+                      pytest --junitxml=test-results.xml
                     '''
                 } 
             }

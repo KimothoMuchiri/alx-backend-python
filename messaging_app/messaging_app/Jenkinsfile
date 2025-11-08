@@ -61,13 +61,14 @@ pipeline {
                 docker { image 'python:3.9-slim' } 
             }
             steps {
-                sh 'cd messaging_app'
-                // Build the image, tagging it with your Docker Hub username and a build number
-                script {
+                dir ('messaging_app'){
+                // Build the image, tagging it with your Docker Hub username and a build                 
+                    script {
                     def imageTag = "elcoder062/messaging-app:${env.BUILD_NUMBER}" // <<< REPLACE USERNAME
                     
                     // Assuming your Dockerfile is in the 'messaging_app' directory:
                     sh "docker build -t ${imageTag} ." 
+                }   
                 }
             }
         }
@@ -77,21 +78,22 @@ pipeline {
                 docker { image 'python:3.9-slim' }
             }
             steps {
-                sh 'cd messaging_app'
-                // Use the withCredentials block to securely expose Docker Hub credentials
-                withCredentials([usernamePassword(
-                    credentialsId: 'docker_cli', // <<< MUST MATCH YOUR ID
-                    passwordVariable: 'DOCKER_PASSWORD', 
-                    usernameVariable: 'DOCKER_USERNAME')]) {
-                    
-                    // Log in to Docker Hub using the masked environment variables
-                    sh "docker login -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD}"
-                    
-                    def imageTag = "elcoder062/messaging-app:${env.BUILD_NUMBER}" // <<< REPLACE USERNAME
-                    
-                    // Push the tagged image
-                    sh "docker push ${imageTag}"
-                }
+                dir ('messaging_app'){
+                    // Use the withCredentials block to securely expose Docker Hub credentials
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker_cli', // <<< MUST MATCH YOUR ID
+                        passwordVariable: 'DOCKER_PASSWORD', 
+                        usernameVariable: 'DOCKER_USERNAME')]) {
+                        
+                        // Log in to Docker Hub using the masked environment variables
+                        sh "docker login -u ${env.DOCKER_USERNAME} -p ${env.DOCKER_PASSWORD}"
+                        
+                        def imageTag = "elcoder062/messaging-app:${env.BUILD_NUMBER}" // <<< REPLACE USERNAME
+                        
+                        // Push the tagged image
+                        sh "docker push ${imageTag}"
+                    }  
+                }  
             }
         }
     
@@ -103,4 +105,5 @@ pipeline {
             echo 'Pipeline finished. Check test results for details.'
         }
     }
+
 }
